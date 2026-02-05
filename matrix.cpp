@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
+#include <random>
 
 Matrix::Matrix(const size_t r, const size_t c) : data(r * c, 0.0), rows(r), cols(c) {}
 
@@ -53,6 +54,54 @@ Matrix naive_mul(Matrix& A, Matrix& B) {
             for (size_t j = 0; j < B.cols; ++j) {
                 R.data[i * R.cols + j] += A_ik * B.e(k,j);
             }
+        }
+    }
+
+    return R;
+}
+
+double sum_abs_difference(Matrix &A, Matrix &B) {
+    Matrix R = A - B;
+
+    double sum = 0;
+    for (size_t i = 0; i < R.rows; ++i) {
+        for (size_t j = 0; j < R.cols; ++j) {
+            sum += fabs(R.e(i, j));
+        }
+    }
+
+    return sum;
+}
+
+Matrix gen_random_matrix(int N, int M) {
+    std::random_device rnd_device;
+    std::mt19937 mersenne_engine {rnd_device()};  // Generates random integers
+
+    std::uniform_real_distribution<double> dist {-512.0, 512.0};
+
+    auto gen = [&](){
+        return dist(mersenne_engine);
+    };
+
+    std::vector<double> vec(N * M);
+    std::generate(vec.begin(), vec.end(), gen);
+
+    Matrix result(N, M, vec);
+
+    return result;
+}
+
+Matrix operator-(Matrix& A, Matrix& B) {
+    if (A.cols != B.cols && A.rows != B.rows) {
+        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
+    }
+
+    Matrix R(A.rows, A.cols);
+
+    for (size_t i = 0; i < A.rows; ++i) {
+        for (size_t j = 0; j < B.cols; ++j) {
+            const double val = A.e(i,j) - B.e(i,j);
+            R.setE(i, j, val);
         }
     }
 
