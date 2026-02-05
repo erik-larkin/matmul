@@ -10,8 +10,10 @@ public:
     size_t rows;
     size_t cols;
 
-    Matrix(size_t r, size_t c);
+    Matrix(const size_t r, const size_t c);
     explicit Matrix(const std::vector<std::vector<double>>& input);
+    explicit Matrix(const size_t r, const size_t c, const std::vector<double>& input);
+
     double& e(size_t i, size_t j);
     void setE(size_t i, size_t j, double value);
     void print() const;

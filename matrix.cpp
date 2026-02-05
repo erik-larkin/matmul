@@ -21,6 +21,8 @@ Matrix::Matrix(const std::vector<std::vector<double>>& input) {
     data = result;
 }
 
+Matrix::Matrix(const size_t r, const size_t c, const std::vector<double> &input): rows(r), cols(c), data(input) {}
+
 double inline & Matrix::e(const size_t i, const size_t j) {
     return data[i * cols + j];
 }

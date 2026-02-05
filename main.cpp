@@ -1,14 +1,30 @@
 #include <iostream>
-#include <regex>
+#include <random>
 
 #include "matrix.h"
 
-int main() {
-    Matrix A({{1, 2},
-              {4, 5}});
+Matrix gen_random_matrix(int N, int M) {
+    std::random_device rnd_device;
+    std::mt19937 mersenne_engine {rnd_device()};  // Generates random integers
 
-    Matrix B({{7, 8},
-              {9, 10}});
+    std::uniform_real_distribution<double> dist {1.0, 52.0};
+
+    auto gen = [&](){
+        return dist(mersenne_engine);
+    };
+
+    std::vector<double> vec(N * M);
+    std::generate(vec.begin(), vec.end(), gen);
+
+    Matrix result(N, M, vec);
+
+    return result;
+}
+
+int main() {
+    Matrix A = gen_random_matrix(3, 3);
+
+    Matrix B = gen_random_matrix(3, 3);
 
     Matrix C = naive_mul(A, B);
 
