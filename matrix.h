@@ -22,6 +22,7 @@ public:
 Matrix operator-(Matrix& A, Matrix& B);
 Matrix gen_random_matrix(int N, int M);
 Matrix naive_mul(Matrix& A, Matrix& B);
+Matrix blas_mul(const Matrix& A, const Matrix& B);
 
 double sum_abs_difference(Matrix& A, Matrix& B);
 

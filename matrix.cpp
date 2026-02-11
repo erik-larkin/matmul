@@ -4,6 +4,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <random>
+#include <mkl.h>
 
 Matrix::Matrix(const size_t r, const size_t c) : data(r * c, 0.0), rows(r), cols(c) {}
 
@@ -39,6 +40,15 @@ void Matrix::print() const {
         }
         std::cout << std::endl;
     }
+}
+
+Matrix blas_mul(const Matrix& A, const Matrix& B) {
+    Matrix C(A.rows, B.cols);
+
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.rows, B.cols, A.cols, 1.0,
+        &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &C.data[0], C.cols);
+
+    return C;
 }
 
 Matrix naive_mul(Matrix& A, Matrix& B) {
