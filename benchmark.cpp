@@ -1,4 +1,6 @@
 #include "matrix.h"
+#include "outofplace.h"
+#include "inplace.h"
 #include <benchmark/benchmark.h>
 
 #define ORDER 32

@@ -23,9 +23,4 @@ double sum_abs_difference(Matrix& A, Matrix& B);
 Matrix operator-(Matrix& A, Matrix& B);
 Matrix gen_random_matrix(int N, int M);
 
-Matrix naive_mul(Matrix& A, Matrix& B);
-Matrix vectorised_mul(Matrix& A, Matrix& B);
-Matrix blas_mul(const Matrix& A, const Matrix& B);
-void in_place_mul(Matrix& A, Matrix& B);
-
 #endif //MATRIX_H
