@@ -67,8 +67,11 @@ Matrix vectorised_mul(Matrix& A, Matrix& B) {
 }
 
 Matrix blas_mul(const Matrix& A, const Matrix& B) {
-    Matrix C(A.rows, B.cols);
+    if (A.cols != B.rows) {
+        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
+    }
 
+    Matrix C(A.rows, B.cols);
     cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.rows, B.cols, A.cols, 1.0,
         &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &C.data[0], C.cols);
 

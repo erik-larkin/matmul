@@ -54,6 +54,7 @@ add_executable(matmul-test
         test.cpp
         matrix.cpp
         outofplace.cpp
+        inplace.cpp
 )
 target_link_libraries(matmul-test
         GTest::gtest_main

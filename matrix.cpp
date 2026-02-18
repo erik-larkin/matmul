@@ -74,7 +74,7 @@ Matrix gen_random_matrix(int N, int M) {
 
 Matrix operator-(Matrix& A, Matrix& B) {
     if (A.cols != B.cols && A.rows != B.rows) {
-        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
+        throw std::invalid_argument("Matrix dimensions incompatible for subtraction");
     }
 
     Matrix R(A.rows, A.cols);

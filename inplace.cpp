@@ -3,7 +3,11 @@
 #include <stdexcept>
 #include <algorithm>
 
-void in_place_mul(Matrix& A, Matrix& B) {
+// in-place functions return the matrix that it overwrote in order to keep
+// its interface the same as out-of-place variants, allowing both types
+// of functions to use the test suite
+
+Matrix in_place_mul(Matrix& A, Matrix& B) {
     if (A.cols != B.rows) {
         throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
     }
@@ -24,4 +28,6 @@ void in_place_mul(Matrix& A, Matrix& B) {
             }
         }
     }
+
+    return A;
 }
