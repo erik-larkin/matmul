@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <vector>
 #include <cmath>
-#include "../matrix.h"
-#include "../outofplace.h"
+#include "matrix.h"
+#include "outofplace.h"
 
 bool matricesEqual(Matrix &A, Matrix &B, const double epsilon = 1e-9) {
     if (A.rows != B.rows) return false;
@@ -15,7 +15,7 @@ bool matricesEqual(Matrix &A, Matrix &B, const double epsilon = 1e-9) {
 
 class MatrixMultiplicationTest : public ::testing::Test {};
 
-TEST_F(MatrixMultiplicationTest, IdentityMultiplication) {
+TEST(MatrixMultiplicationTest, IdentityMultiplication) {
     auto A = Matrix(std::vector<std::vector<double>>{{2, 3}, {4, 5}});
     auto id = Matrix(std::vector<std::vector<double>>{{1, 0}, {0, 1}});
 
@@ -26,7 +26,7 @@ TEST_F(MatrixMultiplicationTest, IdentityMultiplication) {
     EXPECT_TRUE(matricesEqual(result, A));
 }
 
-TEST_F(MatrixMultiplicationTest, ZeroMultiplication) {
+TEST(MatrixMultiplicationTest, ZeroMultiplication) {
     auto A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}});
     auto zeroes = Matrix(std::vector<std::vector<double>>{{0, 0}, {0, 0}});
 
@@ -37,19 +37,27 @@ TEST_F(MatrixMultiplicationTest, ZeroMultiplication) {
     EXPECT_TRUE(matricesEqual(result, zeroes));
 }
 
-TEST_F(MatrixMultiplicationTest, BasicMultiplication) {
-    // [1 2 3]   [7  8 ]   [58  64]
-    // [4 5 6] × [9  10] = [139 154]
-    //           [11 12]
+TEST(MatrixMultiplicationTest, BasicMultiplication) {
     auto A = Matrix(std::vector<std::vector<double>>{{1, 2, 3}, {4, 5, 6}});
     auto B = Matrix(std::vector<std::vector<double>>{{7, 8}, {9, 10}, {11, 12}});
     auto expected = Matrix(std::vector<std::vector<double>>{{58, 64}, {139, 154}});
 
     auto result = naive_mul(A, B);
     EXPECT_TRUE(matricesEqual(result, expected));
+
+    A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}, {5, 6}});  // 3x2
+    B = Matrix(std::vector<std::vector<double>>{{7, 8, 9}, {10, 11, 12}});  // 2x3
+    expected = Matrix(std::vector<std::vector<double>>{
+        {27, 30, 33},
+        {61, 68, 75},
+        {95, 106, 117}
+    });
+
+    result = naive_mul(A, B);
+    EXPECT_TRUE(matricesEqual(result, expected));
 }
 
-TEST_F(MatrixMultiplicationTest, SingleElement) {
+TEST(MatrixMultiplicationTest, SingleElement) {
     auto A = Matrix(std::vector<std::vector<double>>{{5}});
     auto B = Matrix(std::vector<std::vector<double>>{{3}});
 
@@ -58,7 +66,7 @@ TEST_F(MatrixMultiplicationTest, SingleElement) {
     EXPECT_TRUE(matricesEqual(result, expected));
 }
 
-TEST_F(MatrixMultiplicationTest, RowVector_ColumnVector) {
+TEST(MatrixMultiplicationTest, RowVector_ColumnVector) {
     auto row = Matrix(std::vector<std::vector<double>>{{1, 2, 3}});
     auto col = Matrix(std::vector<std::vector<double>>{{4}, {5}, {6}});
     auto expected = Matrix(std::vector<std::vector<double>>{{32}});  // 1*4 + 2*5 + 3*6
@@ -67,7 +75,7 @@ TEST_F(MatrixMultiplicationTest, RowVector_ColumnVector) {
     EXPECT_TRUE(matricesEqual(result, expected));
 }
 
-TEST_F(MatrixMultiplicationTest, ColumnVector_RowVector) {
+TEST(MatrixMultiplicationTest, ColumnVector_RowVector) {
     auto col = Matrix(std::vector<std::vector<double>>{{1}, {2}, {3}});
     auto row = Matrix(std::vector<std::vector<double>>{{4, 5, 6}});
     auto expected = Matrix(std::vector<std::vector<double>>{
@@ -80,20 +88,7 @@ TEST_F(MatrixMultiplicationTest, ColumnVector_RowVector) {
     EXPECT_TRUE(matricesEqual(result, expected));
 }
 
-TEST_F(MatrixMultiplicationTest, NonSquareMatrices) {
-    auto A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}, {5, 6}});  // 3x2
-    auto B = Matrix(std::vector<std::vector<double>>{{7, 8, 9}, {10, 11, 12}});  // 2x3
-    auto expected = Matrix(std::vector<std::vector<double>>{
-        {27, 30, 33},
-        {61, 68, 75},
-        {95, 106, 117}
-    });
-
-    auto result = naive_mul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
-}
-
-TEST_F(MatrixMultiplicationTest, NegativeNumbers) {
+TEST(MatrixMultiplicationTest, NegativeNumbers) {
     auto A = Matrix(std::vector<std::vector<double>>{{-1, 2}, {3, -4}});
     auto B = Matrix(std::vector<std::vector<double>>{{5, -6}, {-7, 8}});
     auto expected = Matrix(std::vector<std::vector<double>>{
@@ -105,7 +100,7 @@ TEST_F(MatrixMultiplicationTest, NegativeNumbers) {
     EXPECT_TRUE(matricesEqual(result, expected));
 }
 
-TEST_F(MatrixMultiplicationTest, FloatingPointPrecision) {
+TEST(MatrixMultiplicationTest, FloatingPoint) {
     auto A = Matrix(std::vector<std::vector<double>>{{0.1, 0.2}, {0.3, 0.4}});
     auto B = Matrix(std::vector<std::vector<double>>{{0.5, 0.6}, {0.7, 0.8}});
     auto expected = Matrix(std::vector<std::vector<double>>{
@@ -117,7 +112,7 @@ TEST_F(MatrixMultiplicationTest, FloatingPointPrecision) {
     EXPECT_TRUE(matricesEqual(result, expected, 1e-9));
 }
 
-TEST_F(MatrixMultiplicationTest, LargerMatrix) {
+TEST(MatrixMultiplicationTest, LargerMatrix) {
     auto A = Matrix(std::vector<std::vector<double>>{
         {1, 2, 3, 4},
         {5, 6, 7, 8},

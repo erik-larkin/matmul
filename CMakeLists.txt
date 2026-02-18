@@ -51,7 +51,7 @@ target_link_libraries(matmul-main PUBLIC
 enable_testing()
 
 add_executable(matmul-test
-        test/outofplace_test.cpp
+        test.cpp
         matrix.cpp
         outofplace.cpp
 )
