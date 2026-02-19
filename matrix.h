@@ -17,6 +17,7 @@ public:
     double& e(size_t i, size_t j);
     void setE(size_t i, size_t j, double value);
     void print() const;
+    Matrix get_block(size_t i, size_t j, size_t block_size);
 };
 
 double sum_abs_difference(Matrix& A, Matrix& B);

@@ -41,6 +41,18 @@ void Matrix::print() const {
     }
 }
 
+// assumes good alignment
+Matrix Matrix::get_block(size_t i, size_t j, size_t block_size) {
+    std::vector<double> data;
+
+    for (int r = 0; r < block_size; ++r) {
+        double * addr = &e(i + r, j);
+        data.insert(data.end(), addr, addr + block_size);
+    }
+
+    return Matrix(block_size, block_size, data);
+}
+
 double sum_abs_difference(Matrix &A, Matrix &B) {
     Matrix R = A - B;
 
@@ -74,7 +86,7 @@ Matrix gen_random_matrix(int N, int M) {
 
 Matrix operator-(Matrix& A, Matrix& B) {
     if (A.cols != B.cols && A.rows != B.rows) {
-        throw std::invalid_argument("Matrix dimensions incompatible for subtraction");
+        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
     }
 
     Matrix R(A.rows, A.cols);
