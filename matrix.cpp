@@ -42,7 +42,7 @@ void Matrix::print() const {
 }
 
 // assumes good alignment
-Matrix Matrix::get_block(size_t i, size_t j, size_t block_size) {
+Matrix Matrix::get_block(const size_t i, const size_t j, const size_t block_size) {
     std::vector<double> data;
 
     for (int r = 0; r < block_size; ++r) {
@@ -51,6 +51,27 @@ Matrix Matrix::get_block(size_t i, size_t j, size_t block_size) {
     }
 
     return Matrix(block_size, block_size, data);
+}
+
+void Matrix::set_block(const size_t i, const size_t j, Matrix& block) {
+    for (int r = 0; r < block.rows; ++r) {
+        for (int c = 0; c < block.cols; ++c) {
+            setE(i + r, j + c, block.e(r, c));
+        }
+    }
+}
+
+void Matrix::operator+=(Matrix &other) {
+    if (cols != other.cols && rows != other.rows) {
+        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
+    }
+
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = 0; j < cols; ++j) {
+            const double val = e(i,j) + other.e(i,j);
+            setE(i, j, val);
+        }
+    }
 }
 
 double sum_abs_difference(Matrix &A, Matrix &B) {

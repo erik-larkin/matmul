@@ -18,6 +18,9 @@ public:
     void setE(size_t i, size_t j, double value);
     void print() const;
     Matrix get_block(size_t i, size_t j, size_t block_size);
+    void set_block(size_t i, size_t j, Matrix &block);
+
+    void operator+=(Matrix& other);
 };
 
 double sum_abs_difference(Matrix& A, Matrix& B);

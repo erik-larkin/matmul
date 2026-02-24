@@ -23,6 +23,44 @@ Matrix naive_mul(Matrix& A, Matrix& B) {
     return R;
 }
 
+// assume square matrix
+// assume matrix order is a multiple of block size
+Matrix blocked_mul(Matrix &A, Matrix &B) {
+    constexpr int block_size = 4;
+
+    if (A.cols != B.rows) {
+        throw std::invalid_argument("Matrix dimensions incompatible for multiplication");
+    }
+
+    if (A.cols < block_size) {
+        return naive_mul(A, B);
+    }
+
+    Matrix R(A.rows, B.cols);
+
+    const int num_blocks = A.rows / block_size;
+
+    for (int I = 0; I < num_blocks; ++I) {
+        for (int J = 0; J < num_blocks; ++J) {
+            int i = I * block_size;
+            int j = J * block_size;
+            Matrix R_b = R.get_block(i, j, block_size);
+
+            for (int K = 0; K < num_blocks; ++K) {
+                int k = K * block_size;
+                Matrix A_b = A.get_block(i, k, block_size);
+                Matrix B_b = B.get_block(k, j, block_size);
+                Matrix C_b = naive_mul(A_b, B_b);
+                R_b += C_b;
+            }
+
+            R.set_block(i, j, R_b);
+        }
+    }
+
+    return R;
+}
+
 Matrix vectorised_mul(Matrix& A, Matrix& B) {
     if (A.cols != B.rows) {
         throw std::invalid_argument("Matrix dimensions incompatible for multiplication");

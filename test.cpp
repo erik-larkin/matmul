@@ -69,8 +69,8 @@ TEST_P(MatrixMultiplicationTest, SquareMatrices) {
         {318, 342, 366}
     });
 
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, RectangularMatrices) {
@@ -78,8 +78,8 @@ TEST_P(MatrixMultiplicationTest, RectangularMatrices) {
     auto B = Matrix(std::vector<std::vector<double>>{{7, 8}, {9, 10}, {11, 12}});
     auto expected = Matrix(std::vector<std::vector<double>>{{58, 64}, {139, 154}});
 
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 
     A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}, {5, 6}});  // 3x2
     B = Matrix(std::vector<std::vector<double>>{{7, 8, 9}, {10, 11, 12}});  // 2x3
@@ -89,8 +89,8 @@ TEST_P(MatrixMultiplicationTest, RectangularMatrices) {
         {95, 106, 117}
     });
 
-    result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, SingleElement) {
@@ -98,8 +98,8 @@ TEST_P(MatrixMultiplicationTest, SingleElement) {
     auto B = Matrix(std::vector<std::vector<double>>{{3}});
 
     auto expected = Matrix(std::vector<std::vector<double>>{{15}});
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, RowVector_ColumnVector) {
@@ -107,8 +107,8 @@ TEST_P(MatrixMultiplicationTest, RowVector_ColumnVector) {
     auto col = Matrix(std::vector<std::vector<double>>{{4}, {5}, {6}});
     auto expected = Matrix(std::vector<std::vector<double>>{{32}});  // 1*4 + 2*5 + 3*6
 
-    auto result = matmul(row, col);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(row, col);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, ColumnVector_RowVector) {
@@ -120,8 +120,8 @@ TEST_P(MatrixMultiplicationTest, ColumnVector_RowVector) {
         {12, 15, 18}
     });
 
-    auto result = matmul(col, row);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(col, row);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, NegativeNumbers) {
@@ -132,8 +132,8 @@ TEST_P(MatrixMultiplicationTest, NegativeNumbers) {
         {43, -50}
     });
 
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 TEST_P(MatrixMultiplicationTest, FloatingPoint) {
@@ -144,8 +144,8 @@ TEST_P(MatrixMultiplicationTest, FloatingPoint) {
         {0.43, 0.50}
     });
 
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected, 1e-9));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected, 1e-9));
 }
 
 TEST_P(MatrixMultiplicationTest, LargerMatrix) {
@@ -165,8 +165,8 @@ TEST_P(MatrixMultiplicationTest, LargerMatrix) {
         {12, 14},
         {20, 22}
     });
-    auto result = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(result, expected));
+    auto actual = matmul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
 // Dimension mismatch tests
@@ -191,8 +191,38 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         MatMulImpl{"Naive", naive_mul},
         MatMulImpl{"BLAS", blas_mul},
-        MatMulImpl{"NaiveInPlace", in_place_mul}
+        MatMulImpl{"Blocked", blocked_mul},
+        MatMulImpl{"NaiveInPlace", in_place_mul},
+        MatMulImpl{"InPlaceRows", test_in_place_mul_rows}
     ),
     [](const ::testing::TestParamInfo<MatMulImpl>& info) {
         return info.param.name;
     });
+
+// The following tests assume a correct implementation of BLAS GEMM
+
+TEST(BlockedMatrixMultiplicationTest, EqualToBlockSize) {
+    auto A = gen_random_matrix(8, 8);
+    auto B = gen_random_matrix(8, 8);
+    auto expected = blas_mul(A, B);
+    auto actual = blocked_mul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
+
+    std::cout << "Expected:\n";
+    expected.print();
+    std::cout << "\nActual:\n";
+    actual.print();
+}
+
+TEST(BlockedMatrixMultiplicationTest, AlignedToBlockSize) {
+    auto A = gen_random_matrix(24, 24);
+    auto B = gen_random_matrix(24, 24);
+    auto expected = blas_mul(A, B);
+    auto actual = blocked_mul(A, B);
+    EXPECT_TRUE(matricesEqual(actual, expected));
+
+    std::cout << "Expected:\n";
+    expected.print();
+    std::cout << "\nActual:\n";
+    actual.print();
+}
