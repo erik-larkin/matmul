@@ -5,6 +5,7 @@ find_package(benchmark REQUIRED)
 find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT})
 
 set(CMAKE_CXX_STANDARD 20)
+set(BENCHMARK_FORMAT csv)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -14,6 +15,8 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+set(BENCHMARK_ENABLE_LIBPFM ON)
 
 add_compile_options(-mavx)
 #add_compile_options(-O3)

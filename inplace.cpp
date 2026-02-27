@@ -54,10 +54,8 @@ Matrix in_place_mul_rows(Matrix& A, Matrix& B, int rowsAtATime) {
     }
 
     if (leftoverRows > 0) {
-        A_rows = Matrix(leftoverRows, A.cols);
-
         const auto first = A.data.begin() + i * A.cols;
-        const auto last = first + A_rows.data.size();
+        const auto last = first + (leftoverRows * A.cols);
         std::ranges::copy(first, last, A_rows.data.begin());
         std::ranges::fill(first, last, 0.0);
 
