@@ -24,40 +24,20 @@ Matrix::Matrix(const std::vector<std::vector<double>>& input) {
 
 Matrix::Matrix(const size_t r, const size_t c, const std::vector<double> &input): data(input), rows(r), cols(c) {}
 
-double inline & Matrix::e(const size_t i, const size_t j) {
+double Matrix::e(const size_t i, const size_t j) const {
     return data[i * cols + j];
 }
 
-void inline Matrix::setE(const size_t i, const size_t j, const double value) {
+void Matrix::setE(const size_t i, const size_t j, const double value) {
     data[i * cols + j] = value;
 }
 
 void Matrix::print() const {
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < cols; ++j) {
-            std::cout << data[i * cols + j] << " ";
+            std::cout << data[i * cols + j] << ", ";
         }
         std::cout << std::endl;
-    }
-}
-
-// assumes good alignment
-Matrix Matrix::get_block(const size_t i, const size_t j, const size_t block_size) {
-    std::vector<double> data;
-
-    for (int r = 0; r < block_size; ++r) {
-        double * addr = &e(i + r, j);
-        data.insert(data.end(), addr, addr + block_size);
-    }
-
-    return Matrix(block_size, block_size, data);
-}
-
-void Matrix::set_block(const size_t i, const size_t j, Matrix& block) {
-    for (int r = 0; r < block.rows; ++r) {
-        for (int c = 0; c < block.cols; ++c) {
-            setE(i + r, j + c, block.e(r, c));
-        }
     }
 }
 

@@ -14,11 +14,9 @@ public:
     explicit Matrix(const std::vector<std::vector<double>>& input);
     explicit Matrix(size_t r, size_t c, const std::vector<double>& input);
 
-    double& e(size_t i, size_t j);
+    double e(size_t i, size_t j) const;
     void setE(size_t i, size_t j, double value);
     void print() const;
-    Matrix get_block(size_t i, size_t j, size_t block_size);
-    void set_block(size_t i, size_t j, Matrix &block);
 
     void operator+=(Matrix& other);
 };

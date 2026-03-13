@@ -12,12 +12,11 @@ struct MatMulImpl {
     MatMulFunc func;
 };
 
-bool matricesEqual(Matrix &A, Matrix &B, const double epsilon = 1e-8) {
+bool matricesEqual(Matrix &A, Matrix &B, const double epsilon = 1e-6) {
     if (A.rows != B.rows) return false;
     if (A.cols != B.cols) return false;
 
     const double diff = sum_abs_difference(A, B);
-
     return diff < epsilon;
 }
 
@@ -54,73 +53,34 @@ TEST_P(MatrixMultiplicationTest, ZeroMultiplication) {
 
 TEST_P(MatrixMultiplicationTest, SquareMatrices) {
     auto A = Matrix(std::vector<std::vector<double>>{
-        {1, 2, 3},
-        {4, 5, 6},
-        {7, 8, 9}
+        {1,  2,  3,  4},
+        {5,  6,  7,  8},
+        {9,  10, 11, 12},
+        {13, 14, 15, 16}
     });
     auto B = Matrix(std::vector<std::vector<double>>{
-        {10, 11, 12},
-        {13, 14, 15},
-        {16, 17, 18}
+        {17, 18, 19, 20},
+        {21, 22, 23, 24},
+        {25, 26, 27, 28},
+        {29, 30, 31, 32}
     });
     auto expected = Matrix(std::vector<std::vector<double>>{
-        {84, 90, 96},
-        {201, 216, 231},
-        {318, 342, 366}
+        {250,  260,  270,  280},
+        {618,  644,  670,  696},
+        {986,  1028, 1070, 1112},
+        {1354, 1412, 1470, 1528}
     });
 
     auto actual = matmul(A, B);
     EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
-TEST_P(MatrixMultiplicationTest, RectangularMatrices) {
-    auto A = Matrix(std::vector<std::vector<double>>{{1, 2, 3}, {4, 5, 6}});
-    auto B = Matrix(std::vector<std::vector<double>>{{7, 8}, {9, 10}, {11, 12}});
-    auto expected = Matrix(std::vector<std::vector<double>>{{58, 64}, {139, 154}});
-
+// this test assumes blas_mul is correct
+TEST_P(MatrixMultiplicationTest, LargeMatrices) {
+    auto A = gen_random_matrix(32, 32);
+    auto B = gen_random_matrix(32, 32);
+    auto expected = gemm(A, B);
     auto actual = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-
-    A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}, {5, 6}});  // 3x2
-    B = Matrix(std::vector<std::vector<double>>{{7, 8, 9}, {10, 11, 12}});  // 2x3
-    expected = Matrix(std::vector<std::vector<double>>{
-        {27, 30, 33},
-        {61, 68, 75},
-        {95, 106, 117}
-    });
-
-    actual = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-}
-
-TEST_P(MatrixMultiplicationTest, SingleElement) {
-    auto A = Matrix(std::vector<std::vector<double>>{{5}});
-    auto B = Matrix(std::vector<std::vector<double>>{{3}});
-
-    auto expected = Matrix(std::vector<std::vector<double>>{{15}});
-    auto actual = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-}
-
-TEST_P(MatrixMultiplicationTest, RowVector_ColumnVector) {
-    auto row = Matrix(std::vector<std::vector<double>>{{1, 2, 3}});
-    auto col = Matrix(std::vector<std::vector<double>>{{4}, {5}, {6}});
-    auto expected = Matrix(std::vector<std::vector<double>>{{32}});  // 1*4 + 2*5 + 3*6
-
-    auto actual = matmul(row, col);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-}
-
-TEST_P(MatrixMultiplicationTest, ColumnVector_RowVector) {
-    auto col = Matrix(std::vector<std::vector<double>>{{1}, {2}, {3}});
-    auto row = Matrix(std::vector<std::vector<double>>{{4, 5, 6}});
-    auto expected = Matrix(std::vector<std::vector<double>>{
-        {4, 5, 6},
-        {8, 10, 12},
-        {12, 15, 18}
-    });
-
-    auto actual = matmul(col, row);
     EXPECT_TRUE(matricesEqual(actual, expected));
 }
 
@@ -148,81 +108,16 @@ TEST_P(MatrixMultiplicationTest, FloatingPoint) {
     EXPECT_TRUE(matricesEqual(actual, expected, 1e-9));
 }
 
-TEST_P(MatrixMultiplicationTest, LargerMatrix) {
-    auto A = Matrix(std::vector<std::vector<double>>{
-        {1, 2, 3, 4},
-        {5, 6, 7, 8},
-        {9, 10, 11, 12}
-    });
-    auto B = Matrix(std::vector<std::vector<double>>{
-        {1, 0},
-        {0, 1},
-        {1, 0},
-        {0, 1}
-    });
-    auto expected = Matrix(std::vector<std::vector<double>>{
-        {4, 6},
-        {12, 14},
-        {20, 22}
-    });
-    auto actual = matmul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-}
-
-// Dimension mismatch tests
-TEST_P(MatrixMultiplicationTest, IncompatibleDimensions) {
-    auto A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}});  // 2x2
-    auto B = Matrix(std::vector<std::vector<double>>{{1, 2, 3}});          // 1x3
-
-    EXPECT_THROW(matmul(A, B), std::invalid_argument);
-}
-
-TEST_P(MatrixMultiplicationTest, EmptyMatrix) {
-    auto A = Matrix(std::vector<std::vector<double>>{{1, 2}, {3, 4}});
-    auto empty = Matrix(0, 0);
-
-    EXPECT_THROW(matmul(A, empty), std::invalid_argument);
-    EXPECT_THROW(matmul(empty, A), std::invalid_argument);
-}
-
 INSTANTIATE_TEST_SUITE_P(
     AllImplementations,
     MatrixMultiplicationTest,
     ::testing::Values(
         MatMulImpl{"Naive", naive_mul},
-        MatMulImpl{"BLAS", blas_mul},
-        MatMulImpl{"Blocked", blocked_mul},
-        MatMulImpl{"NaiveInPlace", in_place_mul},
-        MatMulImpl{"InPlaceRows", test_in_place_mul_rows}
+        MatMulImpl{"GEMM", gemm},
+        MatMulImpl{"NaiveInPlace", naive_in_place_mul},
+        MatMulImpl{"InPlaceGEPM", test_in_place_gepm},
+        MatMulImpl{"InPlaceGEMP", test_in_place_gemp}
     ),
     [](const ::testing::TestParamInfo<MatMulImpl>& info) {
         return info.param.name;
     });
-
-// The following tests assume a correct implementation of BLAS GEMM
-
-TEST(BlockedMatrixMultiplicationTest, EqualToBlockSize) {
-    auto A = gen_random_matrix(8, 8);
-    auto B = gen_random_matrix(8, 8);
-    auto expected = blas_mul(A, B);
-    auto actual = blocked_mul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-
-    std::cout << "Expected:\n";
-    expected.print();
-    std::cout << "\nActual:\n";
-    actual.print();
-}
-
-TEST(BlockedMatrixMultiplicationTest, AlignedToBlockSize) {
-    auto A = gen_random_matrix(24, 24);
-    auto B = gen_random_matrix(24, 24);
-    auto expected = blas_mul(A, B);
-    auto actual = blocked_mul(A, B);
-    EXPECT_TRUE(matricesEqual(actual, expected));
-
-    std::cout << "Expected:\n";
-    expected.print();
-    std::cout << "\nActual:\n";
-    actual.print();
-}

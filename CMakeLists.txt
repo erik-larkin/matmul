@@ -18,8 +18,8 @@ FetchContent_MakeAvailable(googletest)
 
 set(BENCHMARK_ENABLE_LIBPFM ON)
 
-add_compile_options(-mavx)
-#add_compile_options(-O3)
+#add_compile_options(-mavx)
+add_compile_options(-O3)
 
 add_executable(matmul-bench
         benchmark.cpp
@@ -47,8 +47,7 @@ target_link_libraries(matmul-bench PUBLIC
 )
 
 target_link_libraries(matmul-main PUBLIC
-        benchmark::benchmark
-        MKL::MKL
+            MKL::MKL
 )
 
 enable_testing()
