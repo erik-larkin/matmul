@@ -15,21 +15,21 @@ size_t g_min_size_new = -1;
 // #define MAX_ORDER 16384
 #define MAX_ORDER 16
 
-static void BM_gemm_noalloc(benchmark::State& state) {
+static void BM_gemm_without_realloc(benchmark::State& state) {
     const int order = state.range(0);
     state.counters.insert({{"Order", order}, {"PanelSize", order}});
 
     Matrix A = gen_random_matrix(order, order);
     Matrix B = gen_random_matrix(order, order);
-    Matrix C(A.rows, B.cols);
+    Matrix aux(A.rows, B.cols);
 
     for (auto _ : state) {
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.rows, B.cols, A.cols, 1.0,
-            &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &C.data[0], C.cols);
+            &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &aux.data[0], aux.cols);
     }
 }
 
-static void BM_gemm_alloc(benchmark::State& state) {
+static void BM_gemm_with_realloc(benchmark::State& state) {
     const int order = state.range(0);
     state.counters.insert({{"Order", order}, {"PanelSize", order}});
 
@@ -37,9 +37,9 @@ static void BM_gemm_alloc(benchmark::State& state) {
     Matrix B = gen_random_matrix(order, order);
 
     for (auto _ : state) {
-        Matrix C(A.rows, B.cols);
+        Matrix aux(A.rows, B.cols);
         cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.rows, B.cols, A.cols, 1.0,
-            &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &C.data[0], C.cols);
+            &A.data[0], A.cols, &B.data[0], B.cols, 0.0, &aux.data[0], aux.cols);
     }
 }
 
@@ -67,7 +67,7 @@ static void BM_naive_in_place_mul(benchmark::State& state) {
     }
 }
 
-static void BM_inplace_gepm_noalloc(benchmark::State& state) {
+static void BM_inplace_gepm_without_realloc(benchmark::State& state) {
     const int order = state.range(0);
     const int panelSize = state.range(1);
     state.counters.insert({{"Order", order}, {"PanelSize", panelSize}});
@@ -81,7 +81,7 @@ static void BM_inplace_gepm_noalloc(benchmark::State& state) {
     }
 }
 
-static void BM_inplace_gepm_alloc(benchmark::State& state) {
+static void BM_inplace_gepm_with_realloc(benchmark::State& state) {
     const int order = state.range(0);
     const int panelSize = state.range(1);
     state.counters.insert({{"Order", order}, {"PanelSize", panelSize}});
@@ -95,7 +95,7 @@ static void BM_inplace_gepm_alloc(benchmark::State& state) {
     }
 }
 
-static void BM_inplace_gemp_noalloc(benchmark::State& state) {
+static void BM_inplace_gemp_without_realloc(benchmark::State& state) {
     const int order = state.range(0);
     const int panelSize = state.range(1);
     state.counters.insert({{"Order", order}, {"PanelSize", panelSize}});
@@ -109,7 +109,7 @@ static void BM_inplace_gemp_noalloc(benchmark::State& state) {
     }
 }
 
-static void BM_inplace_gemp_alloc(benchmark::State& state) {
+static void BM_inplace_gemp_with_realloc(benchmark::State& state) {
     const int order = state.range(0);
     const int panelSize = state.range(1);
     state.counters.insert({{"Order", order}, {"PanelSize", panelSize}});
@@ -126,8 +126,8 @@ static void BM_inplace_gemp_alloc(benchmark::State& state) {
 // BENCHMARK(BM_naive_mul)->RangeMultiplier(2)->Range(1, 16);
 // BENCHMARK(BM_naive_in_place_mul)->RangeMultiplier(2)->Range(1, 16);
 
-// BENCHMARK(BM_gemm_noalloc)->RangeMultiplier(2)->Range(1, MAX_ORDER);
-// BENCHMARK(BM_gemm_alloc)->RangeMultiplier(2)->Range(1, MAX_ORDER);
+BENCHMARK(BM_gemm_without_realloc)->RangeMultiplier(2)->Range(1, MAX_ORDER);
+BENCHMARK(BM_gemm_with_realloc)->RangeMultiplier(2)->Range(1, MAX_ORDER);
 
 static void OrderPanelSizePairs(benchmark::Benchmark* b) {
     for (int order = 1; order <= MAX_ORDER; order *= 2)
@@ -135,10 +135,10 @@ static void OrderPanelSizePairs(benchmark::Benchmark* b) {
             b->Args({order, panelSize});
 }
 
-BENCHMARK(BM_inplace_gepm_noalloc)->Apply(OrderPanelSizePairs);
-BENCHMARK(BM_inplace_gepm_alloc)->Apply(OrderPanelSizePairs);
+BENCHMARK(BM_inplace_gepm_without_realloc)->Apply(OrderPanelSizePairs);
+BENCHMARK(BM_inplace_gepm_with_realloc)->Apply(OrderPanelSizePairs);
 
-BENCHMARK(BM_inplace_gemp_noalloc)->Apply(OrderPanelSizePairs);
-BENCHMARK(BM_inplace_gemp_alloc)->Apply(OrderPanelSizePairs);
+BENCHMARK(BM_inplace_gemp_without_realloc)->Apply(OrderPanelSizePairs);
+BENCHMARK(BM_inplace_gemp_with_realloc)->Apply(OrderPanelSizePairs);
 
 BENCHMARK_MAIN();
